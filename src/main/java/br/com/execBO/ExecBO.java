@@ -1,18 +1,17 @@
 package br.com.execBO;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.rmi.RemoteException;
-
-import javax.xml.rpc.ServiceException;
-
-import br.com.execBO.service.ExecBOServiceEndpoint;
 import br.com.execBO.service.WebServiceExecBO;
-import br.com.execBO.service.WebServiceExecBOLocator;
+import br.com.execBO.service.WebServiceExecBOStub;
+import br.com.execBO.service.entities.CallProcedureWithToken;
+import br.com.execBO.service.entities.CallProcedureWithTokenE;
+import br.com.execBO.service.entities.CallProcedureWithTokenResponseE;
+import br.com.execBO.service.entities.UserAndPasswordLogin;
+import br.com.execBO.service.entities.UserAndPasswordLoginE;
+import br.com.execBO.service.entities.UserAndPasswordLoginResponseE;
 
 public class ExecBO {
 
-	private ExecBOServiceEndpoint service;
+	private WebServiceExecBO service;
 	private String token;
 
 	public ExecBO setService(String address, String port) throws Exception {
@@ -20,30 +19,48 @@ public class ExecBO {
 						   .append(address)
 						   .append(":")
 						   .append(port)
-						   .append("/wsexecbo/WebServiceExecBO?wsdl")
-						   .toString();		
-		try {
-			WebServiceExecBO web = new WebServiceExecBOLocator();
-			service = web.getWebServiceExecBOPort(new URL(url));
-			return this;
-		} catch (MalformedURLException | ServiceException e) {
-			throw new Exception(e);
-		}
+						   .append("/wsexecbo/WebServiceExecBO")
+						   .toString();
+		
+		
+		
+		service = new WebServiceExecBOStub(url);
+		return this;
+		
 
 	}
 
 	public String getResult(String program, String procedure, String param) throws Exception {
-		try {
-			return service.callProcedureWithToken(token, program, procedure, param);
-		} catch (RemoteException e) {
-			throw new Exception(e);
-		}
+		
+		CallProcedureWithToken proc = new CallProcedureWithToken();
+		
+		proc.setArg0(token);
+		proc.setArg1(program);
+		proc.setArg2(procedure);
+		proc.setArg3(param);
+		
+		CallProcedureWithTokenE callProcedure = new CallProcedureWithTokenE();
+		callProcedure.setCallProcedureWithToken(proc);
+		CallProcedureWithTokenResponseE reponse = service.callProcedureWithToken(callProcedure);
+		return reponse.getCallProcedureWithTokenResponse().get_return();
 
 	}
 
 	public ExecBO setToken(String user, String senha) throws Exception {
-		senha = Encrypt.getEncrypt(senha);
-		token = service.userAndPasswordLogin(user, senha);
+		senha = Encrypt.getEncrypt(senha);	
+		
+		UserAndPasswordLogin login = new UserAndPasswordLogin();
+		login.setArg0(user);
+		login.setArg1(senha);
+		
+		UserAndPasswordLoginE user1 = new UserAndPasswordLoginE();
+		
+		user1.setUserAndPasswordLogin(login);		
+		
+		UserAndPasswordLoginResponseE result = service.userAndPasswordLogin(user1 );
+		
+		token = result.getUserAndPasswordLoginResponse().get_return();
+		
 		return this;
 
 	}
