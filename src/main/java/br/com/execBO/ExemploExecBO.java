@@ -21,10 +21,10 @@ import br.com.execBO.entidades.TempTableFields;
  */
 public class ExemploExecBO {
 	
-	public final static String address = "10.1.1.43";
-	public final static String port = "8180";
-	public final static String user = "super";
-	public final static String password = "super03";
+	public final static String address = "address";
+	public final static String port = "port";
+	public final static String user = "user";
+	public final static String password = "password";
 	
 
 	public static void main(String[] args) throws Exception {
